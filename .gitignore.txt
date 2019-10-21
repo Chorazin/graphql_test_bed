@@ -1,1 +1,2 @@
-server/database/init_db.js
+/server/database/init_db.js
+node_modules

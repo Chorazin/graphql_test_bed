@@ -1,4 +1,6 @@
 const graphql = require('graphql');
+const movie_model = require('../models/movie.js');
+const director_model = require('../models/director.js');
 
 const { GraphQLObjectType,
   GraphQLString,
@@ -9,7 +11,7 @@ const { GraphQLObjectType,
 } = graphql;
 
 //dummy test data, will set this up in firebase or mongodb eventually and plug it in
-const movies = [
+/* const movies = [
   {name: 'Ghostbusters', genre: 'Comedy', id: '1', director_id: '1'},
   {name: 'The Blues Brothers', genre: 'Musical', id: '2', director_id: '2'},
   {name: 'Predator', genre: 'Action', id: '3', director_id: '3'},
@@ -24,7 +26,7 @@ const directors = [
   {name: 'John Landis', age: 69, id: '2'},
   {name: 'John McTiernan', age: 68, id: '3'},
   {name: 'John Carpenter', age: 71, id: '4'}
-];
+]; */
 
 //create object types for movies and directors
 //movie type
@@ -39,7 +41,7 @@ const Movie = new GraphQLObjectType({
       type: Director,
       resolve(parent, args) {
         let found = directors.find((elem) => {
-          return elem.id == parent.director_id
+          //return elem.id == parent.director_id
         });
         return found;
       }
@@ -60,9 +62,9 @@ const Director = new GraphQLObjectType({
       resolve(parent, args) {
         //search the movies array based on the parent Director ID and make a list of movies by that director
         let filtered_list = movies.filter((elem) => {
-          if(elem.director_id == parent.id) {
+          /* if(elem.director_id == parent.id) {
             return true;
-          }
+          } */
         });
         return filtered_list;
       }
@@ -87,7 +89,7 @@ const RootQuery = new GraphQLObjectType({
       resolve(parent, args) {
         //look through the movies array for a matching id to the query
         let found = movies.find((elem) => {
-          return elem.id == args.id;
+          //return elem.id == args.id;
         });
         return found;
       }
@@ -99,7 +101,7 @@ const RootQuery = new GraphQLObjectType({
       resolve(parent, args) {
         //look through the directors array for a matching id to the qury
         let found = directors.find((elem) => {
-          return elem.id == args.id;
+          //return elem.id == args.id;
         });
         return found;
       }
@@ -121,6 +123,48 @@ const RootQuery = new GraphQLObjectType({
   }
 });
 
+const Mutation = new GraphQLObjectType({
+  name: 'mutation',
+  fields: {
+    add_director: {
+      type: Director,
+      args: {
+        name: {type: GraphQLString},
+        age: {type: GraphQLInt}
+      },
+
+      resolve(parent, args) {
+        let director = new director_model({
+          name: args.name,
+          age: args.age
+        });
+
+        return director.save();
+      }
+    },
+
+    add_movie: {
+      type: Movie,
+      args: {
+        name: {type: GraphQLString},
+        genre: {type: GraphQLString},
+        director_id: {type: GraphQLID}
+      },
+
+      resolve(parent, args) {
+        let movie = new movie_model({
+          name: args.name,
+          genre: args.genre,
+          director_id: args.director_id
+        });
+
+        return movie.save();
+      }
+    }
+  }
+})
+
 module.exports = new GraphQLSchema({
-  query: RootQuery
+  query: RootQuery,
+  mutation: Mutation
 });
