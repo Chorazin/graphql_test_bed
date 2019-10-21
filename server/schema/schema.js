@@ -123,6 +123,7 @@ const RootQuery = new GraphQLObjectType({
   }
 });
 
+//set up mutations for adding Movies and Directors
 const Mutation = new GraphQLObjectType({
   name: 'mutation',
   fields: {
