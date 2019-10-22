@@ -11,6 +11,7 @@ const { GraphQLObjectType,
   GraphQLNonNull
 } = graphql;
 
+//I think for more complex GraphQL projects you should look at something like https://graphqleditor.com/ to visualise your project
 
 //create object types for movies and directors
 //movie type
@@ -21,6 +22,7 @@ const Movie = new GraphQLObjectType({
     id: {type: GraphQLID},
     name: {type: GraphQLString},
     genre: {type: GraphQLString},
+    //associated with director type
     director: {
       type: Director,
       resolve(parent, args) {
@@ -38,6 +40,7 @@ const Director = new GraphQLObjectType({
     id: {type: GraphQLID},
     name: {type: GraphQLString},
     age: {type: GraphQLInt},
+    //associated with movie type
     movies: {
       type: new GraphQLList(Movie),
       resolve(parent, args) {
