@@ -10,23 +10,6 @@ const { GraphQLObjectType,
   GraphQLList
 } = graphql;
 
-//dummy test data, will set this up in firebase or mongodb eventually and plug it in
-/* const movies = [
-  {name: 'Ghostbusters', genre: 'Comedy', id: '1', director_id: '1'},
-  {name: 'The Blues Brothers', genre: 'Musical', id: '2', director_id: '2'},
-  {name: 'Predator', genre: 'Action', id: '3', director_id: '3'},
-  {name: 'Big Trouble in Little China', genre: 'Adventure', id: '4', director_id: '4'},
-  {name: 'Escape from New York', genre: 'Sci Fi', id: '5', director_id: '4'},
-  {name: 'Stripes', genre: 'Comedy', id: '6', director_id: '1'},
-  {name: 'They Live', genre: 'Sci Fi', id: '7', director_id: '4'}
-];
-
-const directors = [
-  {name: 'Ivan Reitman', age: 72, id: '1'},
-  {name: 'John Landis', age: 69, id: '2'},
-  {name: 'John McTiernan', age: 68, id: '3'},
-  {name: 'John Carpenter', age: 71, id: '4'}
-]; */
 
 //create object types for movies and directors
 //movie type
@@ -40,10 +23,7 @@ const Movie = new GraphQLObjectType({
     director: {
       type: Director,
       resolve(parent, args) {
-        let found = directors.find((elem) => {
-          //return elem.id == parent.director_id
-        });
-        return found;
+        return director_model.findById(parent.director_id);
       }
     }
   })
@@ -61,20 +41,11 @@ const Director = new GraphQLObjectType({
       type: new GraphQLList(Movie),
       resolve(parent, args) {
         //search the movies array based on the parent Director ID and make a list of movies by that director
-        let filtered_list = movies.filter((elem) => {
-          /* if(elem.director_id == parent.id) {
-            return true;
-          } */
-        });
-        return filtered_list;
+        return movie_model.find({director_id: parent.id});
       }
     }
   })
 });
-
-
-
-
 
 
 //set up jump in point for the graph to query data
@@ -88,10 +59,7 @@ const RootQuery = new GraphQLObjectType({
       args: { id: {type: GraphQLID}},
       resolve(parent, args) {
         //look through the movies array for a matching id to the query
-        let found = movies.find((elem) => {
-          //return elem.id == args.id;
-        });
-        return found;
+        return movie_model.findById(args.id);
       }
     },
     //director jump in
@@ -99,25 +67,21 @@ const RootQuery = new GraphQLObjectType({
       type: Director,
       args: { id: {type: GraphQLID}},
       resolve(parent, args) {
-        //look through the directors array for a matching id to the qury
-        let found = directors.find((elem) => {
-          //return elem.id == args.id;
-        });
-        return found;
+      return director_model.findById(args.id);
       }
     },
     //movies list, wanting to just grab all movies seems reasonable
     movie_list: {
       type: new GraphQLList(Movie),
       resolve(parent, args){
-        return movies;
+        return movie_model.find({});
       }
     },
     //director list, wanting to grab all directors seems reasonable
     director_list: {
       type: new GraphQLList(Director),
       resolve(parent, args) {
-        return directors;
+        return director_model.find({});
       }
     }
   }
@@ -127,6 +91,7 @@ const RootQuery = new GraphQLObjectType({
 const Mutation = new GraphQLObjectType({
   name: 'mutation',
   fields: {
+    //add a director mutation
     add_director: {
       type: Director,
       args: {
@@ -143,7 +108,7 @@ const Mutation = new GraphQLObjectType({
         return director.save();
       }
     },
-
+    //add a movie mutation
     add_movie: {
       type: Movie,
       args: {
