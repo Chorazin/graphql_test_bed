@@ -7,7 +7,8 @@ const { GraphQLObjectType,
   GraphQLSchema,
   GraphQLInt,
   GraphQLID,
-  GraphQLList
+  GraphQLList,
+  GraphQLNonNull
 } = graphql;
 
 
@@ -95,8 +96,8 @@ const Mutation = new GraphQLObjectType({
     add_director: {
       type: Director,
       args: {
-        name: {type: GraphQLString},
-        age: {type: GraphQLInt}
+        name: {type: new GraphQLNonNull(GraphQLString)},
+        age: {type: new GraphQLNonNull(GraphQLInt)}
       },
 
       resolve(parent, args) {
@@ -112,9 +113,9 @@ const Mutation = new GraphQLObjectType({
     add_movie: {
       type: Movie,
       args: {
-        name: {type: GraphQLString},
-        genre: {type: GraphQLString},
-        director_id: {type: GraphQLID}
+        name: {type: new GraphQLNonNull(GraphQLString)},
+        genre: {type: new GraphQLNonNull(GraphQLString)},
+        director_id: {type: new GraphQLNonNull(GraphQLID)}
       },
 
       resolve(parent, args) {
